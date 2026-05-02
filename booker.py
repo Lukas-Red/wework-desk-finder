@@ -74,21 +74,21 @@ while True:
     try:
         ww_client = wework_endpoints.WeworkClient(args.client_id, refresh_token=refresh_token, user_agent=user_agent)
     except wework_endpoints.WeworkAuthError:
-        util.send_output('Authentication exception occured. Exiting')
+        util.send_output(args.output, 'Authentication exception occured. Exiting')
         exit(1)
 
     for floor in floors_to_book:
         try:
-            util.send_output(f'Attempting to fetch availability of floor {floor}...')
+            util.send_output(args.output, f'Attempting to fetch availability of floor {floor}...')
             available, reason = ww_client.get_available_for_reservation(floor, args.date)
             if available:
-                util.send_output(args.ouput, f'Floor {floor} can be booked!')
+                util.send_output(args.output, f'Floor {floor} can be booked!')
                 sleep_short()
-                util.send_output(args.ouput, f'Attempting to book floor {floor} for {args.date}...')
+                util.send_output(args.output, f'Attempting to book floor {floor} for {args.date}...')
                 ww_client.book_desk(floor, args.date)
-                util.send_output(args.ouput, f'Request successful! Attempting to fetch reservation details...')
+                util.send_output(args.output, f'Request successful! Attempting to fetch reservation details...')
                 sleep_short()
-                reservation = util.get_reservation(ww_client.get_upcoming_reservations())
+                reservation = util.get_reservation(ww_client.get_upcoming_reservations(), args.date, floor)
                 if not reservation:
                     util.send_output(args.output, 'Unexpected error, resrvation not found, trying again next cycle')
                     raise Exception(f'Error during reservation of floor {floor} on {args.date}')
@@ -99,12 +99,12 @@ while True:
                 exit(0)
 
             else:
-                util.send_output(args.ouput, f'Floor {floor} is unavailable ({reason})')
+                util.send_output(args.output, f'Floor {floor} is unavailable ({reason})')
 
             consecutive_errors = 0
 
         except Exception as e:
-            util.send_output(args.ouput, f'Exception occured during request cycle: {e}')
+            util.send_output(args.output, f'Exception occured during request cycle: {e}')
             consecutive_errors += 1
 
     if consecutive_errors >= max_consecutive_errors:

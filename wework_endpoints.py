@@ -62,7 +62,7 @@ class WeworkClient:
         endpoint = 'Workspace/check-available-reservation-dates-single'
         data = self.get(endpoint, floorId=floor_id, checkDate=date, deskType=desktype)
         # When room is available, Weworks API does not return a Reason, hence the default
-        return data['Available'], data.get('Reason', default='')
+        return data['Available'], data.get('Reason', '')
 
     # see the response sample for the json structure
     def get_upcoming_reservations(self) -> list[dict]:
@@ -118,7 +118,7 @@ class WeworkClient:
             'Authorization': f'Bearer {response.json()['access_token']}'
         })
         self._refresh_token = response.json()['refresh_token']
-        
+        print(f'DEBUG - REMOVE LATER - {self._refresh_token}')
 
     def get_refresh_token(self) -> str:
         return self._refresh_token

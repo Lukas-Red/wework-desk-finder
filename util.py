@@ -44,7 +44,7 @@ def get_random_user_agent():
 def time_offset_to_timedelta(time_offset: str) -> timedelta:
     search_pattern = r'^(\d*?)d?(\d*?)h?(\d*?)m?$'
     res = re.search(search_pattern, time_offset)
-    days, hours, minutes = res.groups()
+    days, hours, minutes = tuple([int(i) if i != '' else 0 for i in res.groups()])
     return timedelta(days=days, hours=hours, minutes=minutes)
 
 
