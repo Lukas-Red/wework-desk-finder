@@ -103,7 +103,7 @@ class WeworkClient:
         self.post(endpoint, post_body)
 
 
-    def set_access_token_from_refresh(self):
+    def _set_access_token_from_refresh(self):
         response = requests.post(
             _oauth_endpoint,
             json={
