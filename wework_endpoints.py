@@ -1,6 +1,7 @@
 import requests
 from time import sleep
 from datetime import timezone, datetime
+import wework_authentication
 
 _cooldown_between_retries = 1
 _timeout = 10
@@ -10,17 +11,50 @@ _oauth_endpoint = 'https://idp.wework.com/oauth/token'
 
 class WeworkClient:
     
-    def __init__(self, client_id: str, refresh_token: str, user_agent: str, authenticate_now = True):
-        self._client_id = client_id
-        self._refresh_token = refresh_token
-        self._user_agent = user_agent
+    def __init__(self, access_token: str, refresh_token: str, client_id: str, token_duration_sec:int, user_agent: str):
+        self.access_token = access_token
+        self.refresh_token = refresh_token
+        self.client_id = client_id
+        self.token_duration_sec = token_duration_sec
+        self.user_agent = user_agent
         self._session = requests.Session()
         self._session.headers.update({
-            'User-Agent': user_agent
+            'User-Agent': user_agent,
+            'Authorization': f'bearer {access_token}'
         })
-        if authenticate_now:
-            self._set_access_token_from_refresh()
-        
+
+
+    @classmethod
+    def from_credentials(cls, username: str, password: str, user_agent: str):
+        json_resp = wework_authentication.auth_with_creds(
+            username=username, 
+            password=password,
+            user_agent=user_agent
+        )
+        return cls(
+            json_resp['access_token'], 
+            json_resp['refresh_token'], 
+            json_resp['client_id'], 
+            json_resp['expires_in'],
+            user_agent=user_agent
+        )
+
+    @classmethod
+    def from_refresh_token(cls, refresh_token: str, client_id: str, user_agent: str):
+        json_resp = wework_authentication.auth_with_refresh_token(
+            refresh_token=refresh_token,
+            client_id=client_id,
+            user_agent=user_agent
+        )
+        return cls(
+            json_resp['access_token'], 
+            json_resp['refresh_token'], 
+            client_id=client_id, 
+            token_duration_sec = json_resp['expires_in'],
+            user_agent=user_agent
+        )
+
+
 
     def get(self, path: str, **params) -> dict:
 
@@ -29,7 +63,7 @@ class WeworkClient:
         # if the status and response payload match an invalid access_token (401 + no body), try to refresh once
         if resp.status_code == 401 and resp.text == '':
             sleep(_cooldown_between_retries)
-            self._set_access_token_from_refresh()
+            self.refresh_auth()
             sleep(_cooldown_between_retries)
             resp = self._session.get(url=f'{_base}/{path}', params=params, timeout=_timeout)
 
@@ -44,7 +78,7 @@ class WeworkClient:
         # if the status and response payload match an invalid access_token (401 + no body), try to refresh once
         if resp.status_code == 401 and resp.text == '':
             sleep(_cooldown_between_retries)
-            self._set_access_token_from_refresh()
+            self.refresh_auth()
             sleep(_cooldown_between_retries)
             resp = self._session.post(url=f'{_base}/{path}', json=json_body, params=params, timeout=_timeout)
 
@@ -103,26 +137,21 @@ class WeworkClient:
         self.post(endpoint, post_body)
 
 
-    def _set_access_token_from_refresh(self):
-        response = requests.post(
-            _oauth_endpoint,
-            json={
-                "grant_type": "refresh_token",
-                "refresh_token": self._refresh_token,
-                "client_id": self._client_id,
-            },
-            headers={"Content-Type": "application/json", "User-Agent": f"{self._user_agent}"}, timeout=_timeout)
-        if response.status_code >= 400:
-            raise WeworkAuthError(f'Authentication error - {response.status_code}: {response.text}')
+    def refresh_auth(self):
+        try:
+            json_resp = wework_authentication.auth_with_refresh_token(
+                self.refresh_token,
+                self.client_id,
+                self.user_agent
+            )
+        except Exception as e:
+            raise WeworkAuthError(str(e)) from e
+        
         self._session.headers.update({
-            'Authorization': f'Bearer {response.json()['access_token']}'
+            'Authorization': f'bearer {json_resp['access_token']}'
         })
-        self._refresh_token = response.json()['refresh_token']
-        print(f'DEBUG - REMOVE LATER - {self._refresh_token}')
-
-    def get_refresh_token(self) -> str:
-        return self._refresh_token
-
+        self.refresh_token = json_resp['refresh_token']
+        self.token_duration_sec = json_resp['expires_in']
 
 class WeworkAuthError(Exception):
     # custom exception to distinguish auth errors

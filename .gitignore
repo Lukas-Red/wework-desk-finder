@@ -1,7 +1,9 @@
 # custom ignores
 test.py
+test_alt.py
 username_password_auth.py
 *.txt
+*.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
