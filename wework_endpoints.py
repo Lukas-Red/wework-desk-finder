@@ -25,11 +25,14 @@ class WeworkClient:
 
 
     @classmethod
-    def from_credentials(cls, username: str, password: str, user_agent: str):
+    def from_credentials(cls, username: str, password: str, user_agent: str, sleep_min: int, sleep_max:int, debug_auth = False):
         json_resp = wework_authentication.auth_with_creds(
             username=username, 
             password=password,
-            user_agent=user_agent
+            user_agent=user_agent,
+            sleep_floor=sleep_min,
+            sleep_ceil=sleep_max,
+            debug_print=debug_auth
         )
         return cls(
             json_resp['access_token'], 

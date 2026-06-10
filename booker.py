@@ -57,7 +57,10 @@ try:
     test_client = wework_endpoints.WeworkClient.from_credentials(
         username=username,
         password=password,
-        user_agent=user_agent
+        user_agent=user_agent,
+        sleep_min=delay_min,
+        sleep_max=delay_max,
+        debug_auth=True
     )
     print('Test successful\n\n')
 except Exception as e:
@@ -72,21 +75,12 @@ except ValueError as e:
     print(f'Exception: {e}')
     exit(1)
 
-# If a start offset is set, sleep that long, while periodically refreshing the access token to keep it alive
+# If a start offset is set, sleep that long
 if args.start_offset:
     start_delta = util.time_offset_to_timedelta(args.start_offset)
     print(f'Start offset detected. Sleeping until {datetime.now() + start_delta}...')
     time_to_sleep_secs = start_delta.total_seconds()
-    while time_to_sleep_secs > 0:
-        if time_to_sleep_secs > test_client._token_duration_seconds * 0.9:
-            sub_time_to_sleep = test_client._token_duration_seconds * uniform(0.8, 0.9)
-            sleep(sub_time_to_sleep)
-            time_to_sleep_secs -= sub_time_to_sleep
-        else:
-            sleep(time_to_sleep_secs)
-            time_to_sleep_secs = 0
-    sleep()
-
+    sleep(time_to_sleep_secs)
 
 
 def sleep_short():
@@ -100,7 +94,9 @@ while True:
         ww_client = wework_endpoints.WeworkClient.from_credentials(
         username=username,
         password=password,
-        user_agent=user_agent
+        user_agent=user_agent,
+        sleep_min=delay_min,
+        sleep_max=delay_max
     )
     except wework_endpoints.WeworkAuthError:
         util.send_output(args.output, 'Authentication exception occured. Exiting')
