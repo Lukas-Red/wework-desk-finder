@@ -32,14 +32,14 @@ Look for these XHR requests:
 Book a desk on FloorID 123 for July 23rd 2027, using all default parameters:
 
 ```bash
-python booker.py -u my_username -fi 123 -d 07/23/2027
+python booker.py -u my_username -fi 123 -d 07/23/27
 >Wework password: my_password
 ```
 
 Skipping the username from the args:
 
 ```bash
-python booker.py -fi 123 -d 07/23/2027
+python booker.py -fi 123 -d 07/23/27
 >Wework username: my_username
 >Wework password: my_password
 ```
@@ -47,35 +47,35 @@ python booker.py -fi 123 -d 07/23/2027
 Book a desk in one of 3 different floors:
 
 ```bash
-python booker.py -u my_username -fi 123,007,321 -d 07/23/2027
+python booker.py -u my_username -fi 123,007,321 -d 07/23/27
 >Wework password: my_password
 ```
 
 Check the availability only every 2 hours:
 
 ```bash
-python booker.py -u my_username -fi 123 -d 07/23/2027 -cd 120
+python booker.py -u my_username -fi 123 -d 07/23/27 -cd 120
 >Wework password: my_password
 ```
 
 Only start in 3 days 8 hours and 50 minutes:
 
 ```bash
-python booker.py -u my_username -fi 123 -d 07/23/2027 -so 3d8h50m
+python booker.py -u my_username -fi 123 -d 07/23/27 -so 3d8h50m
 >Wework password: my_password
 ```
 
 Write logs to a file instead of stdout (file can be created, but the directory must exist):
 
 ```bash
-python booker.py -u my_username -fi 123 -d 07/23/2027 -o /path/to/wework.logs
+python booker.py -u my_username -fi 123 -d 07/23/27 -o /path/to/wework.logs
 >Wework password: my_password
 ```
 
 Wait 3 to 5 seconds between individual web requests:
 
 ```bash
-python booker.py -u my_username -fi 123 -d 07/23/2027 -rd 3,5
+python booker.py -u my_username -fi 123 -d 07/23/27 -rd 3,5
 >Wework password: my_password
 ```
 
