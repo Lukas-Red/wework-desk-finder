@@ -29,7 +29,7 @@ def auth_with_creds(username: str, password: str, user_agent: str, sleep_floor =
     req1_url = 'https://members.wework.com/'
     print(f'\n\nRequesting base page at "{req1_url}"...')
     resp = session.get(
-        url='https://members.wework.com/', 
+        url=req1_url, 
         timeout=_timeout
     )
     print(resp.status_code)
@@ -69,7 +69,9 @@ def auth_with_creds(username: str, password: str, user_agent: str, sleep_floor =
         'code_challenge_method': 'S256',
         'auth0Client': 'eyJuYW1lIjoiQGF1dGgwL2F1dGgwLWFuZ3VsYXIiLCJ2ZXJzaW9uIjoiMi4yLjMifQ=='
     }
-    session.headers.update({'referer': 'https://members.wework.com/'})
+    session.headers.update({
+        'referer': 'https://members.wework.com/'
+    })
     req3_url = 'https://idp.wework.com/authorize'
     print(f'\n\nRequesting authorization at "{req3_url}"...')
     resp = session.get(
