@@ -2,7 +2,9 @@
 test.py
 test_alt.py
 username_password_auth.py
-*.txt
+endpoint_notes.txt
+notes.txt
+watcher.py
 *.env
 
 # Byte-compiled / optimized / DLL files

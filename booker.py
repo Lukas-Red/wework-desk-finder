@@ -25,6 +25,7 @@ requests_cooldown_variation = 0.2
 
 parser = argparse.ArgumentParser(description=desc)
 parser.add_argument('-u', '--username', help='Your Wework username. Can be omitted, the script will then prompt it at runtime instead.')
+parser.add_argument('-p', '--password', help='Your Wework password. Can and should be omitted, the script will prompt it at runtime instead. Only specify it for non-interactive automation')
 parser.add_argument('-fi', '--floor-id', help='Floor Id(s) to book. Can be a single value, or a comma separated list of Ids (the script will try them in order, and stop once one goes through)', required=True)
 parser.add_argument('-d', '--date', help=f'Booking date. Use this format: "{wework_date_format_human_readable}"', required=True)
 parser.add_argument('-cd', '--cooldown', help=f'The average cooldown between availability checks (in minutes). Default value: {request_freq_mins}', default=request_freq_mins)
@@ -35,7 +36,7 @@ parser.add_argument('-o', '--output', help=f'Path for the logs. Default: stdout'
 args = parser.parse_args()
 
 floors_to_book = [int(i) for i in args.floor_id.replace(' ', '').split(',')]
-delay_min, delay_max = [int(i) for i in args.request_delay]
+delay_min, delay_max = [int(i) for i in args.request_delay.replace(' ', '').split(',')]
 
 
 if not args.username:
@@ -43,7 +44,10 @@ if not args.username:
 else:
     username = args.username
 
-password = getpass('Wework password: ')
+if not args.password:
+    password = getpass('Wework password: ')
+else:
+    password = args.password
 
 
 
