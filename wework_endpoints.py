@@ -3,6 +3,9 @@ from time import sleep
 from datetime import timezone, datetime
 import wework_authentication
 
+#TODO remove later
+import json
+
 _cooldown_between_retries = 1
 _timeout = 10
 _base = 'https://members.wework.com/workplaceone/api'
@@ -75,9 +78,19 @@ class WeworkClient:
 
 
     def post(self, path: str, json_body: dict, **params):
-
-        resp = self._session.post(url=f'{_base}/{path}', json=json_body, params=params, timeout=_timeout)
-
+        resp = requests.post(
+            url=f'{_base}/{path}', 
+            json=json_body, 
+            params=params, 
+            timeout=_timeout,
+            headers={'Authorization': f'Bearer {self.access_token}',
+                     'Origin': 'https://members.wework.com', 
+                     'Referer': 'https://members.wework.com/',
+                     'User-Agent': self.user_agent, 
+                     'Accept': 'application/json, text/plain, /',
+                     'Content-Type': 'application/json'
+                     }
+        )
         # if the status and response payload match an invalid access_token (401 + no body), try to refresh once
         if resp.status_code == 401 and resp.text == '':
             sleep(_cooldown_between_retries)
@@ -153,6 +166,7 @@ class WeworkClient:
         self._session.headers.update({
             'Authorization': f'bearer {json_resp['access_token']}'
         })
+        self.access_token = json_resp['access_token']
         self.refresh_token = json_resp['refresh_token']
         self.token_duration_sec = json_resp['expires_in']
 

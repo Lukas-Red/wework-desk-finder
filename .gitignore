@@ -5,6 +5,7 @@ username_password_auth.py
 endpoint_notes.txt
 notes.txt
 watcher.py
+*.test
 *.env
 
 # Byte-compiled / optimized / DLL files

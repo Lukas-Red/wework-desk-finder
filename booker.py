@@ -127,11 +127,13 @@ while True:
                 util.send_output(args.output, f'Floor {floor} is unavailable ({reason})')
 
             consecutive_errors = 0
-
+        
         except Exception as e:
             util.send_output(args.output, f'Exception occured during request cycle: {e}')
             consecutive_errors += 1
 
+        sleep_short()
+        
     if consecutive_errors >= max_consecutive_errors:
         util.send_output(args.output, 'Too many consecutive errors. Exiting')
         exit(1)
